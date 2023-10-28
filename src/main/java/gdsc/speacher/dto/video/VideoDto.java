@@ -16,7 +16,5 @@ public class VideoDto {
     public VideoDto(Video video) {
         this.title = video.getTitle();
         this.videoUrl = video.getVideoUrl();
-
     }
-
 }
