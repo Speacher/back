@@ -2,7 +2,9 @@ package gdsc.speacher.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import gdsc.speacher.entity.Member;
 import gdsc.speacher.entity.Video;
+import gdsc.speacher.repository.MemberRepository;
 import gdsc.speacher.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import java.util.List;
 public class VideoService {
 
     private final VideoRepository videoRepository;
+    private final MemberRepository memberRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -30,7 +33,7 @@ public class VideoService {
     @Transactional
     public String generatePreSignUrl(String filePath,
                                      String bucketName,
-                                     HttpMethod httpMethod) {
+                                     HttpMethod httpMethod, String title, Long id) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -38,7 +41,8 @@ public class VideoService {
 
         String generatedUrl = amazonS3.generatePresignedUrl(bucket, filePath, calendar.getTime(), httpMethod).toString();
 
-        Video video = new Video(generatedUrl);
+        Member member = memberRepository.findById(id).get();
+        Video video = new Video(member, generatedUrl, title);
         log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
         videoRepository.save(video);
         return generatedUrl;

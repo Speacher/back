@@ -28,4 +28,5 @@ public class Member extends BaseEntity {
         this.email = member.getEmail();
         this.password = member.getPassword();
     }
+
 }
