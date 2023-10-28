@@ -15,7 +15,7 @@ import java.util.List;
 public class Member extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
@@ -23,7 +23,9 @@ public class Member extends BaseEntity {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "member")
-    private List<Video> videos = new ArrayList<>();
-
+    public void update(Member member) {
+        this.name = member.getName();
+        this.email = member.getEmail();
+        this.password = member.getPassword();
+    }
 }
