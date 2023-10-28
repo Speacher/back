@@ -36,31 +36,24 @@ public class MemberController {
     // 회원가입
     @PostMapping
     public ResponseEntity createMember(@RequestBody MemberSaveForm form) {
-        Member save = memberService.save(form.getName(), form.getEmail(), form.getPassword());
-        if (save == null) {
-            return ResponseEntity.badRequest().body("가입 실패");
-        }
-        return ResponseEntity.ok().body(save);
+        memberService.save(form.getName(), form.getEmail(), form.getPassword());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     //로그인
     @PostMapping("/login")
-    public ResponseEntity login (@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
-                                 HttpServletRequest httpServletRequest) {
+    public ResponseEntity login(@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
+                                HttpServletRequest httpServletRequest) {
 
-        if(bindingResult.hasErrors()) {
-            log.info("로그인 오류");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-            // 로그인 페이지로 리다이렉트
+        if (bindingResult.hasErrors()) {
+            log.info("아이디 또는 비밀번호 형식 오류");
+            throw new MemberException(INVALID_EMAIL_OR_PASSWORD);
         }
-
         Member loginMember = loginService.login(request.getEmail(), request.getPassword());
-
-        if(loginMember == null) {
-            bindingResult.reject("loginFail");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST); // 여기도 로그인 실패로 리다이렉트
+        if (loginMember == null) {
+            log.info("아이디 또는 비밀번호 오류");
+            throw new MemberException(INVALID_EMAIL_OR_PASSWORD);
         }
-
         HttpSession session = httpServletRequest.getSession();
         // request.getSession() -> 세션이 있으면 세션 반환, 없으면 신규 세션을 생성
         session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
@@ -71,23 +64,20 @@ public class MemberController {
 
     //로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<?> logout (HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> logout(HttpServletRequest httpServletRequest) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-        return new ResponseEntity(HttpStatus.OK); // 홈 페이지로 리다이렉트
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     // 회원정보 수정
     @PatchMapping
     public ResponseEntity updateMember(@RequestBody MemberEditForm form) {
         Member loginMember = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        Member update = memberService.update(loginMember.getId(), form.getName(), form.getEmail(), form.getPassword());
-        if (update == null) {
-            throw new MemberException(INVALID_ID_PASSWORD);
-        }
-        return ResponseEntity.ok().body(update);
+        memberService.update(loginMember.getId(), form.getName(), form.getEmail(), form.getPassword());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     // 회원정보 조회
