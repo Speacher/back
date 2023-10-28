@@ -4,6 +4,7 @@ import gdsc.speacher.entity.Member;
 import gdsc.speacher.exception.ErrorCode;
 import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,35 +20,26 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public Member save(String name, String email, String password) {
-        Member member = new Member(name, email, password);
-        Optional<Member> byEmail = memberRepository.findByEmail(email);
-        if (byEmail.isEmpty()) { // 중복 아이디 예외처리
-            log.info("{} member 저장", member.getEmail());
-            memberRepository.save(member);
-            return memberRepository.findByEmail(member.getEmail()).get();
-        } else {
-            throw new MemberException(INVALID_ID_PASSWORD);
-        }
+
+    @Transactional
+    public void save(String name, String email, String password) {
+        memberRepository.findByEmail(email).ifPresent(value -> {
+            log.info("중복 이메일 회원가입 시도");
+            throw new MemberException(DUPLICATED_MEMBER_EMAIL);
+        });
+
+        memberRepository.save(new Member(name, email, password));
+        log.info("{] member 저장", email);
     }
 
-    public Optional<Member> login(String email, String password) {
-        return memberRepository.findByEmailAndPassword(email, password);
-    }
-
-    public Member update(Long id, String name, String email, String password) {
+    @Transactional
+    public void update(Long id, String name, String email, String password) {
         Optional<Member> byId = memberRepository.findById(id);
-        if (byId.isPresent()) {
-            byId.get().update(name,email,password);
-            return memberRepository.findById(id).get();
-        } else {
-            // 없는 회원
-            return null;
+        if (byId.isEmpty()) {
+            log.info("없는 회원 수정 시도");
+            throw new MemberException(INVALID_ID);
         }
-    }
-
-    public Optional<Member> findById(Long id) {
-        Optional<Member> byId = memberRepository.findById(id);
-        return byId;
+        log.info("{] member 수정", email);
+        byId.get().update(name, email, password);
     }
 }
