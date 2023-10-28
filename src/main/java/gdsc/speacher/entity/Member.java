@@ -23,10 +23,15 @@ public class Member extends BaseEntity {
     private String email;
     private String password;
 
-    public void update(Member member) {
-        this.name = member.getName();
-        this.email = member.getEmail();
-        this.password = member.getPassword();
+    public void update(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
 
+    public Member(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 }

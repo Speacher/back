@@ -1,7 +1,11 @@
 package gdsc.speacher.controller;
 
-import gdsc.speacher.dto.login.LoginDtoRequest;
+import gdsc.speacher.dto.member.LoginDtoRequest;
+import gdsc.speacher.dto.member.MemberDto;
+import gdsc.speacher.dto.member.MemberEditForm;
+import gdsc.speacher.dto.member.MemberSaveForm;
 import gdsc.speacher.entity.Member;
+import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.login.LoginService;
 import gdsc.speacher.login.SessionConst;
 import gdsc.speacher.service.MemberService;
@@ -15,7 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+
+import static gdsc.speacher.exception.ErrorCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,11 +31,12 @@ public class MemberController {
 
     private final MemberService memberService;
     private final LoginService loginService;
+    private final HttpSession session;
 
     // 회원가입
     @PostMapping
-    public ResponseEntity createMember(@RequestBody Member member) {
-        Member save = memberService.save(member);
+    public ResponseEntity createMember(@RequestBody MemberSaveForm form) {
+        Member save = memberService.save(form.getName(), form.getEmail(), form.getPassword());
         if (save == null) {
             return ResponseEntity.badRequest().body("가입 실패");
         }
@@ -74,25 +80,22 @@ public class MemberController {
     }
 
     // 회원정보 수정
-    @PatchMapping("/{id}")
-    public ResponseEntity updateMember(@PathVariable Long id, @RequestBody Member member) {
-        Member update = memberService.update(id, member);
+    @PatchMapping
+    public ResponseEntity updateMember(@RequestBody MemberEditForm form) {
+        Member loginMember = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
+        Member update = memberService.update(loginMember.getId(), form.getName(), form.getEmail(), form.getPassword());
         if (update == null) {
-            return ResponseEntity.badRequest().body("수정 실패");
+            throw new MemberException(INVALID_ID_PASSWORD);
         }
-        return ResponseEntity.ok().body(member);
+        return ResponseEntity.ok().body(update);
     }
 
     // 회원정보 조회
-    @GetMapping("/{id}")
-    public ResponseEntity findById(@PathVariable Long id) {
-        Optional<Member> member = memberService.findById(id);
-        if (member.isPresent()) {
-            log.info("{} 조회 성공", member.get().getName());
-            return ResponseEntity.ok().body(member.get());
-        } else {
-            log.info("조회 실패");
-            return ResponseEntity.badRequest().body("조회 실패");
-        }
+    @GetMapping
+    public ResponseEntity findById() {
+        Member loginMember = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
+        MemberDto memberDto = new MemberDto(loginMember);
+        log.info("{} 회원 조회", loginMember.getEmail());
+        return ResponseEntity.ok().body(memberDto);
     }
 }
