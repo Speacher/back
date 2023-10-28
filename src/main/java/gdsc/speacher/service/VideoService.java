@@ -29,7 +29,7 @@ public class VideoService {
     @Transactional
     public String generatePreSignUrl(String filePath,
                                      String bucketName,
-                                     HttpMethod httpMethod, String title) {
+                                     HttpMethod httpMethod) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -37,10 +37,12 @@ public class VideoService {
 
         String generatedUrl = amazonS3.generatePresignedUrl(bucket, filePath, calendar.getTime(), httpMethod).toString();
 
-        // 영상 URL을 데이터베이스에 저장
-        Video video = new Video(generatedUrl, title);
-        log.info("{} 비디오 생성 후 디비 저장 {}", title, generatedUrl);
+        Video video = new Video(generatedUrl);
+        log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
         videoRepository.save(video);
+
+
         return generatedUrl;
     }
+
 }
