@@ -15,8 +15,7 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
 
     public Optional<Feedback> findByFeedbackId(Long id) {
-        Optional<Feedback> byId = feedbackRepository.findById(id);
-        return byId;
+        return feedbackRepository.findById(id);
     }
 
     public Optional<List<Feedback>> findByVideoId(Long id) {
