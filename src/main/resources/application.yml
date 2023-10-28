@@ -28,3 +28,10 @@ cloud:
       instance-profile: true
       access-key: AKIA4VMS2ZRBNN6BCCFB
       secret-key: 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
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://tempdb.cncmopyd0pfr.ap-northeast-2.rds.amazonaws.com:3306/speacher2?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 19991021
