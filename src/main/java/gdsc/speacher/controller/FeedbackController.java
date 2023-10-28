@@ -22,8 +22,8 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     // 특정 피드백 조회
-    @GetMapping("/feedbackId/{feedbackId}")
-    public ResponseEntity findFeedbackByFeedbackId(@PathVariable Long feedbackId) {
+    @GetMapping("/{videoId}/{feedbackId}")
+    public ResponseEntity findFeedbackByFeedbackId(@PathVariable Long videoId, @PathVariable Long feedbackId) {
         Optional<Feedback> byFeedbackId = feedbackService.findByFeedbackId(feedbackId);
         if (byFeedbackId.isPresent()) {
             return ResponseEntity.ok().body(byFeedbackId.get());
@@ -32,7 +32,7 @@ public class FeedbackController {
     }
 
     // 특정 비디오 피드백 모두 조회
-    @GetMapping("/videoId/{videoId}")
+    @GetMapping("/{videoId}")
     public ResponseEntity findFeedbacksByVideoId(@PathVariable Long videoId) {
         Optional<List<Feedback>> byVideoId = feedbackService.findByVideoId(videoId);
         if (byVideoId.isPresent()){
