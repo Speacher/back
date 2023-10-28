@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +41,12 @@ public class VideoService {
         Video video = new Video(generatedUrl);
         log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
         videoRepository.save(video);
-
-
         return generatedUrl;
+    }
+
+    public List<Video> findAll(Long memberId) {
+        log.info("모든 영상 최신순으로 모두 조회");
+        return videoRepository.findAllByMemberIdOrderByCreateDateDesc(memberId);
     }
 
 }
