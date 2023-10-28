@@ -1,5 +1,8 @@
 package gdsc.speacher.entity;
 
+import gdsc.speacher.entity.feedback.CV;
+import gdsc.speacher.entity.feedback.NLP;
+import gdsc.speacher.entity.feedback.VR;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,24 +12,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Feedback extends BaseEntity{
+public class Feedback extends BaseEntity {
 
     @Id
     @GeneratedValue
     @Column(name = "feedback_id")
     private Long id;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id")
     private Video video;
 
-    private String title;
-    private String script;
+    @OneToOne(mappedBy = "feedback")
+    private CV cv;
 
-    @Column(name = "error_count")
-    private double errorCount;
+    @OneToOne(mappedBy = "feedback")
+    private NLP nlp;
 
-    //그래프??
-
+    @OneToOne(mappedBy = "feedback")
+    private VR vr;
 }
