@@ -1,12 +1,10 @@
 package gdsc.speacher.controller;
 
 import gdsc.speacher.entity.Feedback;
-import gdsc.speacher.entity.Member;
 import gdsc.speacher.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
