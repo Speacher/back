@@ -23,7 +23,7 @@ public class MemberService {
         Member member = new Member(name, email, password);
         Optional<Member> byEmail = memberRepository.findByEmail(email);
         if (byEmail.isEmpty()) { // 중복 아이디 예외처리
-            log.info("{] member 저장", member.getEmail());
+            log.info("{} member 저장", member.getEmail());
             memberRepository.save(member);
             return memberRepository.findByEmail(member.getEmail()).get();
         } else {
