@@ -1,10 +1,4 @@
 #spring:
-#  datasource:
-#    url: jdbc:h2:mem:testdb
-#    username: sa
-#    password:
-#    driver-class-name: org.h2.Driver
-#
 #  jpa:
 #    hibernate:
 #      ddl-auto: create
@@ -20,3 +14,17 @@
 #
 #logging.level:
 #  org.hibernate.SQL: debug
+
+# s3
+cloud:
+  aws:
+    s3:
+      bucket: video-ex
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
+    credentials:
+      instance-profile: true
+      access-key: AKIA4VMS2ZRBNN6BCCFB
+      secret-key: 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

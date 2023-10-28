@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Video extends BaseEntity{
 
+    //private String baseUrl = "https://video-ex.s3.ap-northeast-2.amazonaws.com/"; // 기본 URL
+
     @Id
     @GeneratedValue
     @Column(name = "video_id")
@@ -23,7 +25,8 @@ public class Video extends BaseEntity{
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "video_url")
+    @Lob
+    @Column(name = "video_url", columnDefinition = "TEXT")
     private String videoUrl;
 
     private String title;
@@ -31,4 +34,7 @@ public class Video extends BaseEntity{
     @OneToMany(mappedBy = "video")
     private List<Feedback> feedbacks = new ArrayList<>();
 
+    public Video(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
 }
