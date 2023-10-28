@@ -37,4 +37,10 @@ public class Video extends BaseEntity{
     public Video(String videoUrl) {
         this.videoUrl = videoUrl;
     }
+
+    public Video(Member member, String videoUrl, String title) {
+        this.member = member;
+        this.videoUrl = videoUrl;
+        this.title = title;
+    }
 }
