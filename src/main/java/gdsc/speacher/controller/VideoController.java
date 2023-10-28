@@ -16,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/videos")
+@CrossOrigin
 public class VideoController {
     private final VideoService videoService;
 
@@ -44,4 +45,11 @@ public class VideoController {
         return videoDtos;
     }
 
+    //특정 비디오 조회
+    @GetMapping("/{videoId}/{id}")
+    public VideoDto video(@PathVariable Long videoId, @PathVariable Long id) {
+        Video findVideo = videoService.findById(videoId);
+        VideoDto videoDto = new VideoDto(findVideo);
+        return videoDto;
+    }
 }

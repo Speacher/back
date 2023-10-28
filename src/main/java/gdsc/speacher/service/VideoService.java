@@ -53,4 +53,10 @@ public class VideoService {
         return videoRepository.findAllByMemberIdOrderByCreateDateDesc(memberId);
     }
 
+    public Video findById(Long videoId) {
+        Video findVideo = videoRepository.findById(videoId)
+                .orElseThrow(() -> new IllegalArgumentException("영상 조회 시 오류 발생"));
+        log.info("{} 비디오 영상 조회", findVideo.getTitle());
+        return findVideo;
+    }
 }
