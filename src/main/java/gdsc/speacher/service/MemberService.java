@@ -29,7 +29,7 @@ public class MemberService {
         });
 
         memberRepository.save(new Member(name, email, password));
-        log.info("{] member 저장", email);
+        log.info("{} member 저장", email);
     }
 
     @Transactional
