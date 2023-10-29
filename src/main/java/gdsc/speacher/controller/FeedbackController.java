@@ -1,5 +1,6 @@
 package gdsc.speacher.controller;
 
+import gdsc.speacher.dto.feedback.FeedbackDto;
 import gdsc.speacher.entity.Feedback;
 import gdsc.speacher.exception.FeedbackException;
 
@@ -26,20 +27,14 @@ public class FeedbackController {
     // 특정 피드백 조회
     @GetMapping("/{videoId}/{feedbackId}")
     public ResponseEntity findFeedbackByFeedbackId(@PathVariable Long videoId, @PathVariable Long feedbackId) {
-        Optional<Feedback> byFeedbackId = feedbackService.findByFeedbackId(feedbackId);
-        if (byFeedbackId.isEmpty()) {
-            throw new FeedbackException(INVALID_FEEDBACK_ID);
-        }
-        return ResponseEntity.ok().body(byFeedbackId.get());
+        FeedbackDto byFeedbackId = feedbackService.findByFeedbackId(feedbackId);
+        return ResponseEntity.ok().body(byFeedbackId);
     }
 
     // 특정 비디오 피드백 모두 조회
     @GetMapping("/{videoId}")
     public ResponseEntity findFeedbacksByVideoId(@PathVariable Long videoId) {
-        Optional<List<Feedback>> byVideoId = feedbackService.findByVideoId(videoId);
-        if (byVideoId.isEmpty()) {
-            throw new FeedbackException(INVALID_VIDEO_ID);
-        }
-        return ResponseEntity.ok().body(byVideoId.get());
+        List<FeedbackDto> byVideoId = feedbackService.findByVideoId(videoId);
+        return ResponseEntity.ok().body(byVideoId);
     }
 }
