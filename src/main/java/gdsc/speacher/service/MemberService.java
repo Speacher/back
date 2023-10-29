@@ -1,7 +1,6 @@
 package gdsc.speacher.service;
 
 import gdsc.speacher.entity.Member;
-import gdsc.speacher.exception.ErrorCode;
 import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -39,7 +38,7 @@ public class MemberService {
             log.info("없는 회원 수정 시도");
             throw new MemberException(INVALID_ID);
         }
-        log.info("{] member 수정", email);
+        log.info("{} member 수정", email);
         byId.get().update(name, email, password);
     }
 }
