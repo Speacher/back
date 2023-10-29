@@ -1,6 +1,7 @@
-package gdsc.speacher.login;
+package gdsc.speacher.service;
 
 import gdsc.speacher.entity.Member;
+import gdsc.speacher.repository.LoginMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
