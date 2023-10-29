@@ -9,7 +9,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(MemberException.class)
-    public ResponseEntity<ErrorResponse> ruralExceptionHandler(MemberException e) {
+    public ResponseEntity<ErrorResponse> speacherExceptionHandler(MemberException e) {
+        return ErrorResponse.toResponseEntity(e.getErrorCode());
+    }
+    @ExceptionHandler(FeedbackException.class)
+    public ResponseEntity<ErrorResponse> speacherExceptionHandler(FeedbackException e) {
         return ErrorResponse.toResponseEntity(e.getErrorCode());
     }
 }
