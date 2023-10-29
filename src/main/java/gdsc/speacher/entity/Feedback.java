@@ -31,4 +31,6 @@ public class Feedback extends BaseEntity {
 
     @OneToOne(mappedBy = "feedback")
     private VR vr;
+
+    private String title;
 }
