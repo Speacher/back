@@ -6,7 +6,7 @@ import gdsc.speacher.dto.member.MemberEditForm;
 import gdsc.speacher.dto.member.MemberSaveForm;
 import gdsc.speacher.entity.Member;
 import gdsc.speacher.exception.MemberException;
-import gdsc.speacher.login.LoginService;
+import gdsc.speacher.service.LoginService;
 import gdsc.speacher.login.SessionConst;
 import gdsc.speacher.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package gdsc.speacher.login;
+package gdsc.speacher.repository;
 
 import gdsc.speacher.entity.Member;
 import jakarta.persistence.EntityManager;
