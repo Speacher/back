@@ -74,18 +74,18 @@ public class MemberController {
 
     // 회원정보 수정
     @PatchMapping
-    public ResponseEntity updateMember(@RequestBody MemberEditForm form) {
+    public BaseResponse<Long> updateMember(@RequestBody MemberEditForm form) {
         Member loginMember = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        memberService.update(loginMember.getId(), form.getName(), form.getEmail(), form.getPassword());
-        return new ResponseEntity(HttpStatus.OK);
+        memberService.update(loginMember.getId(), form);
+        return  BaseResponse.onSuccess(loginMember.getId());
     }
 
     // 회원정보 조회
     @GetMapping
-    public ResponseEntity findById() {
+    public BaseResponse<MemberDto> findById() {
         Member loginMember = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         MemberDto memberDto = new MemberDto(loginMember);
         log.info("{} 회원 조회", loginMember.getEmail());
-        return ResponseEntity.ok().body(memberDto);
+        return BaseResponse.onSuccess(memberDto);
     }
 }

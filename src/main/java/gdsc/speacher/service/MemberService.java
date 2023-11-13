@@ -1,6 +1,7 @@
 package gdsc.speacher.service;
 
 import gdsc.speacher.config.exception.handler.MemberHandler;
+import gdsc.speacher.dto.member.MemberEditForm;
 import gdsc.speacher.dto.member.MemberSaveForm;
 import gdsc.speacher.entity.Member;
 import gdsc.speacher.repository.MemberRepository;
@@ -36,13 +37,13 @@ public class MemberService {
     }
 
     @Transactional
-    public void update(Long id, String name, String email, String password) {
+    public void update(Long id ,MemberEditForm form) {
         Optional<Member> byId = memberRepository.findById(id);
         if (byId.isEmpty()) {
             log.info("없는 회원 수정 시도");
             throw new MemberHandler(INVALID_ID);
         }
-        log.info("{} member 수정", email);
-        byId.get().update(name, email, password);
+        log.info("{} member 수정", form.getEmail());
+        byId.get().update(form.getName(), form.getEmail(), form.getPassword());
     }
 }
