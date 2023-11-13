@@ -1,11 +1,9 @@
 package gdsc.speacher.service;
 
+import gdsc.speacher.config.exception.handler.FeedbackHandler;
 import gdsc.speacher.dto.feedback.FeedbackDto;
-import gdsc.speacher.dto.feedback.VideoDto;
 import gdsc.speacher.entity.Feedback;
 import gdsc.speacher.entity.Video;
-import gdsc.speacher.exception.FeedbackException;
-import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static gdsc.speacher.exception.ErrorCode.*;
+import static gdsc.speacher.config.code.status.ErrorStatus.INVALID_FEEDBACK_ID;
+import static gdsc.speacher.config.code.status.ErrorStatus.INVALID_VIDEO_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,7 @@ public class FeedbackService {
     public FeedbackDto findByFeedbackId(Long id) {
         Optional<Feedback> byId = feedbackRepository.findById(id);
         if(!byId.isPresent()){
-            throw new FeedbackException(INVALID_FEEDBACK_ID);
+            throw new FeedbackHandler(INVALID_FEEDBACK_ID);
         }
         Feedback feedback = byId.get();
         FeedbackDto feedbackDto = new FeedbackDto(
@@ -39,11 +38,11 @@ public class FeedbackService {
     public List<FeedbackDto> findByVideoId(Long id) {
         Optional<Video> byId = videoRepository.findById(id);
         if(!byId.isPresent()){
-            throw new FeedbackException(INVALID_VIDEO_ID);
+            throw new FeedbackHandler(INVALID_VIDEO_ID);
         }
         Optional<List<Feedback>> all = feedbackRepository.findAllByVideoIdOrderByCreateDateDesc(id);
         if(!all.isPresent()){
-            throw new FeedbackException(INVALID_VIDEO_ID);
+            throw new FeedbackHandler(INVALID_VIDEO_ID);
         }
         List<Feedback> feedbacks = all.get();
         List<FeedbackDto> feedbackDtos = new ArrayList<>();
