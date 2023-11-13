@@ -1,5 +1,6 @@
 package gdsc.speacher.controller;
 
+import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.dto.feedback.FeedbackDto;
 
 import gdsc.speacher.service.FeedbackService;
@@ -21,15 +22,15 @@ public class FeedbackController {
 
     // 특정 피드백 조회
     @GetMapping("/{videoId}/{feedbackId}")
-    public ResponseEntity findFeedbackByFeedbackId(@PathVariable Long videoId, @PathVariable Long feedbackId) {
+    public BaseResponse<FeedbackDto> findFeedbackByFeedbackId(@PathVariable Long videoId, @PathVariable Long feedbackId) {
         FeedbackDto byFeedbackId = feedbackService.findByFeedbackId(feedbackId);
-        return ResponseEntity.ok().body(byFeedbackId);
+        return BaseResponse.onSuccess(byFeedbackId);
     }
 
     // 특정 비디오 피드백 모두 조회
     @GetMapping("/{videoId}")
-    public ResponseEntity findFeedbacksByVideoId(@PathVariable Long videoId) {
+    public BaseResponse<List<FeedbackDto>> findFeedbacksByVideoId(@PathVariable Long videoId) {
         List<FeedbackDto> byVideoId = feedbackService.findByVideoId(videoId);
-        return ResponseEntity.ok().body(byVideoId);
+        return BaseResponse.onSuccess(byVideoId);
     }
 }

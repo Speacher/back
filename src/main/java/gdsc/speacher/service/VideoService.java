@@ -9,8 +9,16 @@ import gdsc.speacher.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -46,6 +54,24 @@ public class VideoService {
         log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
         videoRepository.save(video);
         return generatedUrl;
+    }
+
+    @Transactional
+    public byte[] analyze(MultipartFile file) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", file.getResource());
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        log.info("flask 서버 API 호출");
+        // Flask 서버 API 호출
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, byte[].class);
+        log.info("분석 완료 - 분석 결과 : {}", response.getBody());
+        return response.getBody();
     }
 
     public List<Video> findAll(Long memberId) {

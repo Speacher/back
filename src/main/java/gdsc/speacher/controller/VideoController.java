@@ -1,6 +1,7 @@
 package gdsc.speacher.controller;
 
 import com.amazonaws.HttpMethod;
+import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.dto.video.VideoDto;
 import gdsc.speacher.entity.Member;
 import gdsc.speacher.entity.Video;
@@ -10,9 +11,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,19 +34,22 @@ public class VideoController {
 
     //비디오 업로드
     @PostMapping
-    public ResponseEntity<String> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
+    public BaseResponse<String> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         log.info("{} member", member.getEmail());
-        return ResponseEntity.ok(
-                videoService.generatePreSignUrl(UUID.randomUUID()+"."+ extension,bucketName, HttpMethod.PUT, title, member.getId()));
+        String generatedUrl = videoService.generatePreSignUrl(UUID.randomUUID() + "." + extension, bucketName, HttpMethod.PUT, title, member.getId());
+        return BaseResponse.onSuccess(generatedUrl);
     }
 
     //비디오 분석
-    //@PostMapping("/analyze")
-
+    @PostMapping("/analyze")
+    public BaseResponse<byte[]> analyze(@RequestPart("file") MultipartFile file) throws IOException {
+        byte[] analyze = videoService.analyze(file);
+        return BaseResponse.onSuccess(analyze);
+    }
     //비디오 리스트 조회
     @GetMapping
-    public List<VideoDto> videoList() {
+    public BaseResponse<List<VideoDto>> videoList() {
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         List<Video> videos = videoService.findAll(member.getId());
         List<VideoDto> videoDtos = new ArrayList<>();
@@ -52,14 +57,13 @@ public class VideoController {
             VideoDto videoDto = new VideoDto(video);
             videoDtos.add(videoDto);
         }
-        return videoDtos;
+        return BaseResponse.onSuccess(videoDtos);
     }
-
     //특정 비디오 조회
     @GetMapping("/{videoId}")
-    public VideoDto video(@PathVariable Long videoId) {
+    public BaseResponse<VideoDto> video(@PathVariable Long videoId) {
         Video findVideo = videoService.findById(videoId);
         VideoDto videoDto = new VideoDto(findVideo);
-        return videoDto;
+        return BaseResponse.onSuccess(videoDto);
     }
 }
