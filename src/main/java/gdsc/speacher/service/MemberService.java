@@ -1,7 +1,7 @@
 package gdsc.speacher.service;
 
+import gdsc.speacher.config.exception.handler.MemberHandler;
 import gdsc.speacher.entity.Member;
-import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static gdsc.speacher.exception.ErrorCode.*;
+import static gdsc.speacher.config.code.status.ErrorStatus.DUPLICATED_MEMBER_EMAIL;
+import static gdsc.speacher.config.code.status.ErrorStatus.INVALID_ID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class MemberService {
     public void save(String name, String email, String password) {
         memberRepository.findByEmail(email).ifPresent(value -> {
             log.info("중복 이메일 회원가입 시도");
-            throw new MemberException(DUPLICATED_MEMBER_EMAIL);
+            throw new MemberHandler(DUPLICATED_MEMBER_EMAIL);
         });
 
         memberRepository.save(new Member(name, email, password));
@@ -36,7 +38,7 @@ public class MemberService {
         Optional<Member> byId = memberRepository.findById(id);
         if (byId.isEmpty()) {
             log.info("없는 회원 수정 시도");
-            throw new MemberException(INVALID_ID);
+            throw new MemberHandler(INVALID_ID);
         }
         log.info("{} member 수정", email);
         byId.get().update(name, email, password);

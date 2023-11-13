@@ -29,8 +29,9 @@ public class VideoController {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+
     //비디오 업로드
-    @PostMapping("/upload")
+    @PostMapping
     public ResponseEntity<String> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         log.info("{} member", member.getEmail());

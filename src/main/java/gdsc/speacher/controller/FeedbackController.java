@@ -1,8 +1,6 @@
 package gdsc.speacher.controller;
 
 import gdsc.speacher.dto.feedback.FeedbackDto;
-import gdsc.speacher.entity.Feedback;
-import gdsc.speacher.exception.FeedbackException;
 
 import gdsc.speacher.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-
-import static gdsc.speacher.exception.ErrorCode.*;
 
 @RestController
 @RequiredArgsConstructor

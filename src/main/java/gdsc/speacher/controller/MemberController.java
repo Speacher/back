@@ -1,11 +1,11 @@
 package gdsc.speacher.controller;
 
+import gdsc.speacher.config.exception.handler.MemberHandler;
 import gdsc.speacher.dto.member.LoginDtoRequest;
 import gdsc.speacher.dto.member.MemberDto;
 import gdsc.speacher.dto.member.MemberEditForm;
 import gdsc.speacher.dto.member.MemberSaveForm;
 import gdsc.speacher.entity.Member;
-import gdsc.speacher.exception.MemberException;
 import gdsc.speacher.service.LoginService;
 import gdsc.speacher.login.SessionConst;
 import gdsc.speacher.service.MemberService;
@@ -19,8 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static gdsc.speacher.config.code.status.ErrorStatus.INVALID_EMAIL_OR_PASSWORD;
 
-import static gdsc.speacher.exception.ErrorCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,12 +47,12 @@ public class MemberController {
 
         if (bindingResult.hasErrors()) {
             log.info("아이디 또는 비밀번호 형식 오류");
-            throw new MemberException(INVALID_EMAIL_OR_PASSWORD);
+            throw new MemberHandler(INVALID_EMAIL_OR_PASSWORD);
         }
         Member loginMember = loginService.login(request.getEmail(), request.getPassword());
         if (loginMember == null) {
             log.info("아이디 또는 비밀번호 오류");
-            throw new MemberException(INVALID_EMAIL_OR_PASSWORD);
+            throw new MemberHandler(INVALID_EMAIL_OR_PASSWORD);
         }
         HttpSession session = httpServletRequest.getSession();
         // request.getSession() -> 세션이 있으면 세션 반환, 없으면 신규 세션을 생성
