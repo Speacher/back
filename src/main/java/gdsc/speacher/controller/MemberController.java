@@ -42,7 +42,7 @@ public class MemberController {
 
     //로그인
     @PostMapping("/login")
-    public BaseResponse<String> login(@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
+    public BaseResponse<Long> login(@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
                                 HttpServletRequest httpServletRequest) {
 
         if (bindingResult.hasErrors()) {
@@ -59,17 +59,17 @@ public class MemberController {
         session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
         // 세션에 로그인 회원 정보를 보관
         log.info("{} 로그인 성공!", loginMember.getEmail());
-        return BaseResponse.onSuccess(loginMember.getEmail());
+        return BaseResponse.onSuccess(loginMember.getId());
     }
 
     //로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest httpServletRequest) {
+    public BaseResponse<String> logout(HttpServletRequest httpServletRequest) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return BaseResponse.onSuccess("logout");
     }
 
     // 회원정보 수정
