@@ -42,7 +42,7 @@ public class MemberController {
 
     //로그인
     @PostMapping("/login")
-    public ResponseEntity login(@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
+    public BaseResponse<String> login(@Validated @RequestBody LoginDtoRequest request, BindingResult bindingResult,
                                 HttpServletRequest httpServletRequest) {
 
         if (bindingResult.hasErrors()) {
@@ -59,7 +59,7 @@ public class MemberController {
         session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
         // 세션에 로그인 회원 정보를 보관
         log.info("{} 로그인 성공!", loginMember.getEmail());
-        return new ResponseEntity(HttpStatus.OK);
+        return BaseResponse.onSuccess(loginMember.getEmail());
     }
 
     //로그아웃
