@@ -1,6 +1,7 @@
 package gdsc.speacher.service;
 
 import gdsc.speacher.config.exception.handler.MemberHandler;
+import gdsc.speacher.dto.member.MemberSaveForm;
 import gdsc.speacher.entity.Member;
 import gdsc.speacher.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -23,14 +24,15 @@ public class MemberService {
 
 
     @Transactional
-    public void save(String name, String email, String password) {
-        memberRepository.findByEmail(email).ifPresent(value -> {
+    public Long save(MemberSaveForm form) {
+        memberRepository.findByEmail(form.getEmail()).ifPresent(value -> {
             log.info("중복 이메일 회원가입 시도");
             throw new MemberHandler(DUPLICATED_MEMBER_EMAIL);
         });
-
-        memberRepository.save(new Member(name, email, password));
-        log.info("{} member 저장", email);
+        Member member = new Member(form.getName(), form.getEmail(), form.getPassword());
+        memberRepository.save(member);
+        log.info("{} member 저장", form.getEmail());
+        return member.getId();
     }
 
     @Transactional

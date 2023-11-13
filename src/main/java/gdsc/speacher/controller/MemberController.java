@@ -1,5 +1,6 @@
 package gdsc.speacher.controller;
 
+import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.config.exception.handler.MemberHandler;
 import gdsc.speacher.dto.member.LoginDtoRequest;
 import gdsc.speacher.dto.member.MemberDto;
@@ -35,9 +36,8 @@ public class MemberController {
 
     // 회원가입
     @PostMapping
-    public ResponseEntity createMember(@RequestBody MemberSaveForm form) {
-        memberService.save(form.getName(), form.getEmail(), form.getPassword());
-        return new ResponseEntity(HttpStatus.OK);
+    public BaseResponse<Long> createMember(@RequestBody MemberSaveForm form) {
+        return BaseResponse.onSuccess(memberService.save(form));
     }
 
     //로그인
