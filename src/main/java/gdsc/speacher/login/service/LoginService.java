@@ -1,6 +1,6 @@
 package gdsc.speacher.login.service;
 
-import gdsc.speacher.entity.Member;
+import gdsc.speacher.domain.Member;
 import gdsc.speacher.login.repository.LoginMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

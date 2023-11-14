@@ -1,9 +1,9 @@
 package gdsc.speacher.feedback.dto;
 
-import gdsc.speacher.entity.Video;
-import gdsc.speacher.entity.feedback.CV;
-import gdsc.speacher.entity.feedback.NLP;
-import gdsc.speacher.entity.feedback.VR;
+import gdsc.speacher.domain.Video;
+import gdsc.speacher.domain.feedback.CV;
+import gdsc.speacher.domain.feedback.NLP;
+import gdsc.speacher.domain.feedback.VR;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

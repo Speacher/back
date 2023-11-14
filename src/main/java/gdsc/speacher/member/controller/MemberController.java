@@ -6,7 +6,7 @@ import gdsc.speacher.login.dto.LoginDtoRequest;
 import gdsc.speacher.member.dto.MemberDto;
 import gdsc.speacher.member.dto.MemberEditForm;
 import gdsc.speacher.member.dto.MemberSaveForm;
-import gdsc.speacher.entity.Member;
+import gdsc.speacher.domain.Member;
 import gdsc.speacher.login.service.LoginService;
 import gdsc.speacher.login.config.SessionConst;
 import gdsc.speacher.member.service.MemberService;

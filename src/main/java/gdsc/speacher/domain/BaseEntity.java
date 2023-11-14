@@ -1,4 +1,4 @@
-package gdsc.speacher.entity;
+package gdsc.speacher.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

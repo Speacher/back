@@ -1,8 +1,8 @@
-package gdsc.speacher.entity;
+package gdsc.speacher.domain;
 
-import gdsc.speacher.entity.feedback.CV;
-import gdsc.speacher.entity.feedback.NLP;
-import gdsc.speacher.entity.feedback.VR;
+import gdsc.speacher.domain.feedback.CV;
+import gdsc.speacher.domain.feedback.NLP;
+import gdsc.speacher.domain.feedback.VR;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

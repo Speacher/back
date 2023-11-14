@@ -1,6 +1,6 @@
 package gdsc.speacher;
 
-import gdsc.speacher.entity.Member;
+import gdsc.speacher.domain.Member;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
