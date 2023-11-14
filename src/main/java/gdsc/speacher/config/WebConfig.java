@@ -1,8 +1,8 @@
 package gdsc.speacher.config;
 
-import gdsc.speacher.login.LoginCheckInterceptor;
-import gdsc.speacher.login.LoginInterceptor;
-import gdsc.speacher.login.LoginMemberArgumentResolver;
+import gdsc.speacher.login.config.LoginCheckInterceptor;
+import gdsc.speacher.login.config.LoginInterceptor;
+import gdsc.speacher.login.config.LoginMemberArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
