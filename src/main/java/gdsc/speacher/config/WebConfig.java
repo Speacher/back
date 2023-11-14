@@ -17,7 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
         resolvers.add(new LoginMemberArgumentResolver());
     }
 
-    @Override
+   /* @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor())
                 .order(2)
@@ -30,5 +30,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/", "/api/members", "/api/members/login",
                         "/css/**", "/*.ico", "/error", "/session-info",
                         "/v3/api-docs/**", "/swagger-ui/**");
-    }
+    }*/
 }

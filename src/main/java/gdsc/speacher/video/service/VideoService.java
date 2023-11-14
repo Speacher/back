@@ -49,15 +49,19 @@ public class VideoService {
 
         String generatedUrl = amazonS3.generatePresignedUrl(bucket, filePath, calendar.getTime(), httpMethod).toString();
 
+
+        int indexOfMp4 = generatedUrl.lastIndexOf(".mp4");
+        String fileName = (indexOfMp4 != -1) ? generatedUrl.substring(0, indexOfMp4 + 4) : generatedUrl;
+
         Member member = memberRepository.findById(id).get();
-        Video video = new Video(member, generatedUrl, title);
+        Video video = new Video(member, fileName, title);
         log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
         videoRepository.save(video);
         return generatedUrl;
     }
 
     @Transactional
-    public byte[] analyze(MultipartFile file) {
+    public String analyze(MultipartFile file) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -68,8 +72,8 @@ public class VideoService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
-        ResponseEntity<byte[]> response = restTemplate.exchange(
-                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, byte[].class);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("분석 완료 - 분석 결과 : {}", response.getBody());
         return response.getBody();
     }

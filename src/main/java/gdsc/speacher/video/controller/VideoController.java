@@ -36,22 +36,23 @@ public class VideoController {
     @PostMapping
     public BaseResponse<String> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        log.info("{} member", member.getEmail());
-        String generatedUrl = videoService.generatePreSignUrl(UUID.randomUUID() + "." + extension, bucketName, HttpMethod.PUT, title, member.getId());
+        // log.info("{} member", member.getEmail());
+        String generatedUrl = videoService.generatePreSignUrl(UUID.randomUUID() + "." + extension, bucketName, HttpMethod.PUT, title, 1L);
         return BaseResponse.onSuccess(generatedUrl);
     }
 
     //비디오 분석
     @PostMapping("/analyze")
-    public BaseResponse<byte[]> analyze(@RequestPart("file") MultipartFile file) throws IOException {
-        byte[] analyze = videoService.analyze(file);
+    public BaseResponse<String> analyze(@RequestPart("file") MultipartFile file) throws IOException {
+        String analyze = videoService.analyze(file);
         return BaseResponse.onSuccess(analyze);
     }
     //비디오 리스트 조회
     @GetMapping
     public BaseResponse<List<VideoDto>> videoList() {
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
-        List<Video> videos = videoService.findAll(member.getId());
+        System.out.println("member = " + member);
+        List<Video> videos = videoService.findAll(1L);
         List<VideoDto> videoDtos = new ArrayList<>();
         for (Video video : videos) {
             VideoDto videoDto = new VideoDto(video);
