@@ -42,6 +42,7 @@ public class VideoController {
     }
 
     //비디오 분석
+    @CrossOrigin
     @PostMapping("/analyze")
     public BaseResponse<String> analyze(@RequestPart("file") MultipartFile file) throws IOException {
         String analyze = videoService.analyze(file);
