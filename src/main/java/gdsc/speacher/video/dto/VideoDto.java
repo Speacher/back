@@ -1,6 +1,6 @@
 package gdsc.speacher.video.dto;
 
-import gdsc.speacher.entity.Video;
+import gdsc.speacher.domain.Video;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

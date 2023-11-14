@@ -2,8 +2,8 @@ package gdsc.speacher.feedback.service;
 
 import gdsc.speacher.config.exception.handler.FeedbackHandler;
 import gdsc.speacher.feedback.dto.FeedbackDto;
-import gdsc.speacher.entity.Feedback;
-import gdsc.speacher.entity.Video;
+import gdsc.speacher.domain.Feedback;
+import gdsc.speacher.domain.Video;
 import gdsc.speacher.feedback.repository.FeedbackRepository;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;

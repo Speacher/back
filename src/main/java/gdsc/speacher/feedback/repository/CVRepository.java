@@ -1,7 +1,7 @@
 package gdsc.speacher.feedback.repository;
 
-import gdsc.speacher.entity.Feedback;
-import gdsc.speacher.entity.feedback.CV;
+import gdsc.speacher.domain.Feedback;
+import gdsc.speacher.domain.feedback.CV;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

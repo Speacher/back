@@ -1,7 +1,6 @@
 package gdsc.speacher.member.dto;
 
-import gdsc.speacher.entity.Member;
-import jakarta.persistence.Entity;
+import gdsc.speacher.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

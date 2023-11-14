@@ -3,7 +3,7 @@ package gdsc.speacher.member.service;
 import gdsc.speacher.config.exception.handler.MemberHandler;
 import gdsc.speacher.member.dto.MemberEditForm;
 import gdsc.speacher.member.dto.MemberSaveForm;
-import gdsc.speacher.entity.Member;
+import gdsc.speacher.domain.Member;
 import gdsc.speacher.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

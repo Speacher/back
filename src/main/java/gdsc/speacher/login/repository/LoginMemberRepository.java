@@ -1,6 +1,6 @@
 package gdsc.speacher.login.repository;
 
-import gdsc.speacher.entity.Member;
+import gdsc.speacher.domain.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;

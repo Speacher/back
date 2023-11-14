@@ -2,8 +2,8 @@ package gdsc.speacher.video.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import gdsc.speacher.entity.Member;
-import gdsc.speacher.entity.Video;
+import gdsc.speacher.domain.Member;
+import gdsc.speacher.domain.Video;
 import gdsc.speacher.member.repository.MemberRepository;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
