@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gdsc.speacher.config.exception.handler.FileHandler;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
@@ -37,6 +38,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static gdsc.speacher.config.code.status.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -118,7 +121,7 @@ public class VideoService {
         String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".") + 1) : null;
 
         if (!"mp4".equalsIgnoreCase(extension) && !"mp3".equalsIgnoreCase(extension)) {
-            throw new IllegalArgumentException("Invalid file format. Please upload mp3 or mp4 file.");
+            throw new FileHandler(INVALID_FILE_FORMAT);
         }
 
         // 2. 파일을 서버에 저장
@@ -126,9 +129,9 @@ public class VideoService {
         try(OutputStream os = new FileOutputStream(sourceFile)) {
             os.write(file.getBytes());
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new FileHandler(FILE_NOT_FOUND);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileHandler(FILE_IO_EXCEPTION);
         }
 
         // 3. mp4 파일일 경우 mp3로 변환
@@ -158,7 +161,7 @@ public class VideoService {
         try {
             analyzeResult = objectMapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileHandler(FILE_IO_EXCEPTION);
         }
 
         // 필러 워드를 JSON 형태의 문자열로 변환하여 저장
