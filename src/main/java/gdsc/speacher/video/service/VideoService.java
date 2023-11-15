@@ -2,13 +2,19 @@ package gdsc.speacher.video.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
+import gdsc.speacher.domain.NLP;
 import gdsc.speacher.domain.Video;
 import gdsc.speacher.domain.CV;
 import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.member.repository.MemberRepository;
+import gdsc.speacher.nlp.dto.NlpDto;
+import gdsc.speacher.nlp.repository.NLPRepository;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +35,7 @@ import java.io.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +46,7 @@ public class VideoService {
     private final VideoRepository videoRepository;
     private final MemberRepository memberRepository;
     private final CvRepository cvRepository;
+    private final NLPRepository nlpRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -95,11 +103,15 @@ public class VideoService {
                 cvDto.getWalking_actions(),
                 cvDto.getHand_to_face_actions(),
                 cvDto.getHands_behind_back_actions());
+
         cvRepository.save(cv);
+        log.info("Cv 분석 결과 저장 성공 {}", cv.getId());
         return cvDto;
     }
 
-    public String analyzeNlp(MultipartFile file) {
+    public NlpDto analyzeNlp(MultipartFile file) {
+
+        log.info("여기 호출이 되긴 하나");
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".") + 1) : null;
 
@@ -124,7 +136,7 @@ public class VideoService {
         } else {
             targetFileName = sourceFile.getAbsolutePath();
         }
-
+        log.info("mp3로 변환 완");
         // 4. mp3 파일을 플라스크 서버로 전송
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -134,10 +146,32 @@ public class VideoService {
         body.add("file", new FileSystemResource(new File(targetFileName)));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
+        log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
                 "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> analyzeResult = null;
+        try {
+            analyzeResult = objectMapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 필러 워드를 JSON 형태의 문자열로 변환하여 저장
+        Map<String, Integer> fillerWordMap = (Map<String, Integer>) analyzeResult.get("filler_word");
+        String fillerWordJson = null;
+        try {
+            fillerWordJson = objectMapper.writeValueAsString(fillerWordMap);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        NlpDto nlpDto = new NlpDto((String)analyzeResult.get("script"), (Double) analyzeResult.get("time"), (Double) analyzeResult.get("speed"), fillerWordJson);
+
+        NLP nlp = new NLP(nlpDto.getScript(), nlpDto.getTime(), nlpDto.getSpeed(), nlpDto.getFillerWord());
+        nlpRepository.save(nlp);
+        log.info("nlp 분석 결과 저장 성공 {}", nlp.getId());
 
         // 5. 임시 파일 삭제
         sourceFile.delete();
@@ -145,7 +179,7 @@ public class VideoService {
             new File(targetFileName).delete();
         }
 
-        return response.getBody();
+        return nlpDto;
     }
 
     public void convertMp4ToMp3(String mp4Source, String mp3Target) {
@@ -174,4 +208,6 @@ public class VideoService {
         log.info("{} 비디오 영상 조회", findVideo.getTitle());
         return findVideo;
     }
+
+
 }

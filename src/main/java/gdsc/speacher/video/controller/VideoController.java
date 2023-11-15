@@ -3,21 +3,17 @@ package gdsc.speacher.video.controller;
 import com.amazonaws.HttpMethod;
 import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.cv.dto.CvDto;
-import gdsc.speacher.domain.BaseEntity;
-import gdsc.speacher.domain.CV;
+import gdsc.speacher.domain.*;
+import gdsc.speacher.nlp.dto.NlpDto;
 import gdsc.speacher.video.dto.VideoDto;
-import gdsc.speacher.domain.Member;
-import gdsc.speacher.domain.Video;
 import gdsc.speacher.login.config.SessionConst;
 import gdsc.speacher.video.service.VideoService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,8 +49,8 @@ public class VideoController {
     }
 
     @PostMapping("/analyze-nlp")
-    public BaseResponse<String> analyzeNlp(@RequestPart("file") MultipartFile file)  {
-        String analyze = videoService.analyzeNlp(file);
+    public BaseResponse<NlpDto> analyzeNlp(@RequestPart("file") MultipartFile file)  {
+        NlpDto analyze = videoService.analyzeNlp(file);
         return BaseResponse.onSuccess(analyze);
     }
 
@@ -86,6 +82,15 @@ public class VideoController {
         CV cv = findVideo.getCv();
         CvDto cvDto = new CvDto(cv);
         return BaseResponse.onSuccess(cvDto);
+    }
+
+    //특정 비디오 CV 피드백 조회
+    @GetMapping("/{videoId}/nlp")
+    public BaseResponse<NlpDto> nlpFeedback(@PathVariable Long videoId) {
+        Video findVideo = videoService.findById(videoId);
+        NLP nlp = findVideo.getNlp();
+        NlpDto nlpDto = new NlpDto(nlp.getScript(),nlp.getTime(),nlp.getSpeed(),nlp.getFillerWord());
+        return BaseResponse.onSuccess(nlpDto);
     }
 
 

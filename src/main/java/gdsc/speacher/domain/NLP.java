@@ -15,5 +15,24 @@ public class NLP extends BaseEntity {
     @Column(name = "nlp_id")
     private Long id;
 
-    private String val;
+    @Lob
+    @Column(nullable = false)
+    private String script;
+
+    @Column(nullable = false)
+    private Double time;
+
+    @Column(nullable = false)
+    private Double speed;
+
+    @Lob
+    @Column(nullable = false)
+    private String fillerWord;
+
+    public NLP(String script, Double time, Double speed, String fillerWord) {
+        this.script = script;
+        this.time = time;
+        this.speed = speed;
+        this.fillerWord = fillerWord;
+    }
 }
