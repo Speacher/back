@@ -15,9 +15,5 @@ public class NLP extends BaseEntity {
     @Column(name = "nlp_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "video_id")
-    private Video video;
-
     private String val;
 }

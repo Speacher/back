@@ -31,7 +31,13 @@ public class Video extends BaseEntity{
 
     private String title;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cv_id")
+    private CV cv;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nlp_id")
+    private NLP nlp;
     public Video(String videoUrl) {
         this.videoUrl = videoUrl;
     }

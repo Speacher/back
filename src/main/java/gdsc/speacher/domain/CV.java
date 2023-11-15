@@ -15,9 +15,6 @@ public class CV extends BaseEntity {
     @Column(name = "cv_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "video_id")
-    private Video video;
 
 
     private Integer crossing_arms_count;

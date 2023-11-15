@@ -4,6 +4,7 @@ import com.amazonaws.HttpMethod;
 import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.domain.BaseEntity;
+import gdsc.speacher.domain.CV;
 import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.domain.Member;
 import gdsc.speacher.domain.Video;
@@ -77,4 +78,15 @@ public class VideoController {
         VideoDto videoDto = new VideoDto(findVideo);
         return BaseResponse.onSuccess(videoDto);
     }
+
+    //특정 비디오 CV 피드백 조회
+    @GetMapping("/{videoId}/cv")
+    public BaseResponse<CvDto> cvFeedback(@PathVariable Long videoId) {
+        Video findVideo = videoService.findById(videoId);
+        CV cv = findVideo.getCv();
+        CvDto cvDto = new CvDto(cv);
+        return BaseResponse.onSuccess(cvDto);
+    }
+
+
 }
