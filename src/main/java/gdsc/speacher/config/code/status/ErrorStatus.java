@@ -33,8 +33,13 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //file error
     FILE_NOT_FOUND(BAD_REQUEST, "FILE4001", "파일이 존재하지 않습니다"),
-    FILE_IO_EXCEPTION(INTERNAL_SERVER_ERROR, "FILE5001", "파일 입출력 예외가 발생했습니다."),
     INVALID_FILE_FORMAT(BAD_REQUEST, "FILE4002", "mp4 또는 mp3 형식이 아닙니다"),
+    FILE_IO_EXCEPTION(INTERNAL_SERVER_ERROR, "FILE5001", "파일 입출력 예외가 발생했습니다."),
+    MP4_TO_MP3_ERROR(INTERNAL_SERVER_ERROR, "FILE5002", "mp4에서 mp3 변환 시 에러가 발생하였습니다."),
+
+
+    //json error
+    JSON_TO_STRING_ERROR(INTERNAL_SERVER_ERROR, "JSON_5001", "JSON 변환 시 에러가 발생했습니다"),
 
     // Ror test
     TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트");

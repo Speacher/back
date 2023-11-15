@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gdsc.speacher.config.exception.handler.FileHandler;
+import gdsc.speacher.config.exception.handler.JsonHandler;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
@@ -170,7 +171,7 @@ public class VideoService {
         try {
             fillerWordJson = objectMapper.writeValueAsString(fillerWordMap);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonHandler(JSON_TO_STRING_ERROR);
         }
         NlpDto nlpDto = new NlpDto((String)analyzeResult.get("script"), (Double) analyzeResult.get("time"), (Double) analyzeResult.get("speed"), fillerWordJson);
         Video video = videoRepository.findById(videoId).orElseThrow(() -> new IllegalArgumentException("비디오 못찾음"));
@@ -196,7 +197,7 @@ public class VideoService {
             Process process = pb.start();
             process.waitFor();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            throw new FileHandler(MP4_TO_MP3_ERROR);
         }
     }
 
