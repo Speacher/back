@@ -15,6 +15,7 @@ import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.member.repository.MemberRepository;
 import gdsc.speacher.nlp.dto.NlpDto;
 import gdsc.speacher.nlp.repository.NLPRepository;
+import gdsc.speacher.video.dto.VideoRes;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,7 @@ public class VideoService {
     private final AmazonS3 amazonS3;
 
     @Transactional
-    public String generatePreSignUrl(String filePath,
+    public VideoRes generatePreSignUrl(String filePath,
                                      String bucketName,
                                      HttpMethod httpMethod, String title, Long id) {
 
@@ -71,8 +72,10 @@ public class VideoService {
         Member member = memberRepository.findById(id).get();
         Video video = new Video(member, fileName, title);
         log.info("비디오 생성 후 디비 저장 {}", generatedUrl);
-        videoRepository.save(video);
-        return generatedUrl;
+        Video saveVideo = videoRepository.save(video);
+        VideoRes videoRes = new VideoRes(saveVideo.getId(), generatedUrl);
+
+        return videoRes;
     }
 
     @Transactional
@@ -111,7 +114,6 @@ public class VideoService {
 
     public NlpDto analyzeNlp(MultipartFile file, Long videoId) {
 
-        log.info("여기 호출이 되긴 하나");
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".") + 1) : null;
 
@@ -136,7 +138,7 @@ public class VideoService {
         } else {
             targetFileName = sourceFile.getAbsolutePath();
         }
-        log.info("mp3로 변환 완");
+        log.info("mp3로 변환 완료");
         // 4. mp3 파일을 플라스크 서버로 전송
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

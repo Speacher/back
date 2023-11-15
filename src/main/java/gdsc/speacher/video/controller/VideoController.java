@@ -7,6 +7,7 @@ import gdsc.speacher.domain.*;
 import gdsc.speacher.nlp.dto.NlpDto;
 import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.login.config.SessionConst;
+import gdsc.speacher.video.dto.VideoRes;
 import gdsc.speacher.video.service.VideoService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +34,11 @@ public class VideoController {
 
     //비디오 업로드
     @PostMapping
-    public BaseResponse<String> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
+    public BaseResponse<VideoRes> generatePresignedUrl(@RequestParam String extension, @RequestParam String title){
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         // log.info("{} member", member.getEmail());
-        String generatedUrl = videoService.generatePreSignUrl(UUID.randomUUID() + "." + extension, bucketName, HttpMethod.PUT, title, 1L);
-        return BaseResponse.onSuccess(generatedUrl);
+        VideoRes videoRes = videoService.generatePreSignUrl(UUID.randomUUID() + "." + extension, bucketName, HttpMethod.PUT, title, 1L);
+        return BaseResponse.onSuccess(videoRes);
     }
 
     //비디오 분석

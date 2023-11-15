@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findAllByMemberIdOrderByCreateDateDesc(@Param("memberId") Long memberId);
+
 }
