@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gdsc.speacher.config.exception.handler.FileHandler;
 import gdsc.speacher.config.exception.handler.JsonHandler;
+import gdsc.speacher.config.exception.handler.VideoHandler;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
@@ -211,7 +212,7 @@ public class VideoService {
 
     public Video findById(Long videoId) {
         Video findVideo = videoRepository.findById(videoId)
-                .orElseThrow(() -> new IllegalArgumentException("영상 조회 시 오류 발생"));
+                .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
         log.info("{} 비디오 영상 조회", findVideo.getTitle());
         return findVideo;
     }
