@@ -29,10 +29,15 @@ public class NLP extends BaseEntity {
     @Column(nullable = false)
     private String fillerWord;
 
-    public NLP(String script, Double time, Double speed, String fillerWord) {
+    @OneToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
+
+    public NLP(String script, Double time, Double speed, String fillerWord, Video video) {
         this.script = script;
         this.time = time;
         this.speed = speed;
         this.fillerWord = fillerWord;
+        this.video = video;
     }
 }

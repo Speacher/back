@@ -109,7 +109,7 @@ public class VideoService {
         return cvDto;
     }
 
-    public NlpDto analyzeNlp(MultipartFile file) {
+    public NlpDto analyzeNlp(MultipartFile file, Long videoId) {
 
         log.info("여기 호출이 되긴 하나");
         String originalFilename = file.getOriginalFilename();
@@ -168,8 +168,8 @@ public class VideoService {
             throw new RuntimeException(e);
         }
         NlpDto nlpDto = new NlpDto((String)analyzeResult.get("script"), (Double) analyzeResult.get("time"), (Double) analyzeResult.get("speed"), fillerWordJson);
-
-        NLP nlp = new NLP(nlpDto.getScript(), nlpDto.getTime(), nlpDto.getSpeed(), nlpDto.getFillerWord());
+        Video video = videoRepository.findById(videoId).orElseThrow(() -> new IllegalArgumentException("비디오 못찾음"));
+        NLP nlp = new NLP(nlpDto.getScript(), nlpDto.getTime(), nlpDto.getSpeed(), nlpDto.getFillerWord(), video);
         nlpRepository.save(nlp);
         log.info("nlp 분석 결과 저장 성공 {}", nlp.getId());
 
@@ -184,7 +184,8 @@ public class VideoService {
 
     public void convertMp4ToMp3(String mp4Source, String mp3Target) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(
+            ProcessBuilder pb = new
+                    ProcessBuilder(
                     "ffmpeg", "-i", mp4Source, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", mp3Target);
             pb.redirectErrorStream(true);
             Process process = pb.start();

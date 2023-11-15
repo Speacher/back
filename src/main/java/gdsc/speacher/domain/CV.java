@@ -15,7 +15,9 @@ public class CV extends BaseEntity {
     @Column(name = "cv_id")
     private Long id;
 
-
+    @OneToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
     private Integer crossing_arms_count;
     private Integer hands_in_pockets_count;

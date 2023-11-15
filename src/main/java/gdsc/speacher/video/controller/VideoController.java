@@ -42,15 +42,15 @@ public class VideoController {
 
     //비디오 분석
     @CrossOrigin
-    @PostMapping("/analyze-cv")
-    public BaseResponse<CvDto> analyzeCv(@RequestPart("file") MultipartFile file)  {
+    @PostMapping("/{videoId}/analyze-cv")
+    public BaseResponse<CvDto> analyzeCv(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
         CvDto analyze = videoService.analyzeCv(file);
         return BaseResponse.onSuccess(analyze);
     }
 
-    @PostMapping("/analyze-nlp")
-    public BaseResponse<NlpDto> analyzeNlp(@RequestPart("file") MultipartFile file)  {
-        NlpDto analyze = videoService.analyzeNlp(file);
+    @PostMapping("/{videoId}/analyze-nlp")
+    public BaseResponse<NlpDto> analyzeNlp(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
+        NlpDto analyze = videoService.analyzeNlp(file, videoId);
         return BaseResponse.onSuccess(analyze);
     }
 
