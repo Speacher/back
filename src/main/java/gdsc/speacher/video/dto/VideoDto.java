@@ -13,11 +13,13 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor
 public class VideoDto {
 
+    private Long videoId;
     private String title;
     private String videoUrl;
     private String createdAt;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public VideoDto(Video video) {
+        this.videoId = video.getId();
         this.title = video.getTitle();
         this.videoUrl = video.getVideoUrl();
         this.createdAt = video.getLastModifiedDate().format(formatter);
