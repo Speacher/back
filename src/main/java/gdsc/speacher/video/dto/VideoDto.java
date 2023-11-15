@@ -17,11 +17,11 @@ public class VideoDto {
     private String title;
     private String videoUrl;
     private String createdAt;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public VideoDto(Video video) {
         this.videoId = video.getId();
         this.title = video.getTitle();
         this.videoUrl = video.getVideoUrl();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.createdAt = video.getLastModifiedDate().format(formatter);
     }
 }
