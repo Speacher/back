@@ -96,7 +96,7 @@ public class VideoService {
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://172.20.10.2:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("분석 완료 - 분석 결과 : {}", response.getBody());
         JsonToCvDtoConverter converter = new JsonToCvDtoConverter();
         CvDto cvDto = null;
@@ -156,7 +156,7 @@ public class VideoService {
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://172.20.10.2:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> analyzeResult = null;
