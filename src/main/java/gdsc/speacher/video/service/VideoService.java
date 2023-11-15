@@ -2,13 +2,18 @@ package gdsc.speacher.video.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import gdsc.speacher.converter.JsonToCvDtoConverter;
+import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
 import gdsc.speacher.domain.Video;
+import gdsc.speacher.domain.CV;
+import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.member.repository.MemberRepository;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +38,7 @@ public class VideoService {
 
     private final VideoRepository videoRepository;
     private final MemberRepository memberRepository;
+    private final CvRepository cvRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -61,7 +68,7 @@ public class VideoService {
     }
 
     @Transactional
-    public String analyze(MultipartFile file) {
+    public CvDto analyzeCv(MultipartFile file) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -75,8 +82,86 @@ public class VideoService {
         ResponseEntity<String> response = restTemplate.exchange(
                 "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("분석 완료 - 분석 결과 : {}", response.getBody());
+        JsonToCvDtoConverter converter = new JsonToCvDtoConverter();
+        CvDto cvDto = null;
+        try {
+            cvDto = converter.convert(response.getBody());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        CV cv = new CV(cvDto.getCrossing_arms_count(),
+                cvDto.getHands_in_pockets_count(),
+                cvDto.getWalking_actions(),
+                cvDto.getHand_to_face_actions(),
+                cvDto.getHands_behind_back_actions());
+        cvRepository.save(cv);
+        return cvDto;
+    }
+
+    public String analyzeNlp(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".") + 1) : null;
+
+        if (!"mp4".equalsIgnoreCase(extension) && !"mp3".equalsIgnoreCase(extension)) {
+            throw new IllegalArgumentException("Invalid file format. Please upload mp3 or mp4 file.");
+        }
+
+        // 2. 파일을 서버에 저장
+        File sourceFile = new File("temp." + extension);
+        try(OutputStream os = new FileOutputStream(sourceFile)) {
+            os.write(file.getBytes());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 3. mp4 파일일 경우 mp3로 변환
+        String targetFileName = "temp.mp3";
+        if ("mp4".equalsIgnoreCase(extension)) {
+            convertMp4ToMp3(sourceFile.getAbsolutePath(), targetFileName);
+        } else {
+            targetFileName = sourceFile.getAbsolutePath();
+        }
+
+        // 4. mp3 파일을 플라스크 서버로 전송
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new FileSystemResource(new File(targetFileName)));
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Flask 서버 API 호출
+        ResponseEntity<String> response = restTemplate.exchange(
+                "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+
+        // 5. 임시 파일 삭제
+        sourceFile.delete();
+        if (!sourceFile.getAbsolutePath().equals(targetFileName)) {
+            new File(targetFileName).delete();
+        }
+
         return response.getBody();
     }
+
+    public void convertMp4ToMp3(String mp4Source, String mp3Target) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ffmpeg", "-i", mp4Source, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", mp3Target);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 
     public List<Video> findAll(Long memberId) {
         log.info("모든 영상 최신순으로 모두 조회");

@@ -31,8 +31,6 @@ public class Video extends BaseEntity{
 
     private String title;
 
-    @OneToMany(mappedBy = "video")
-    private List<Feedback> feedbacks = new ArrayList<>();
 
     public Video(String videoUrl) {
         this.videoUrl = videoUrl;

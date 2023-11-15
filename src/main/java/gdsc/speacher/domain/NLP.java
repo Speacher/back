@@ -1,8 +1,5 @@
-package gdsc.speacher.domain.feedback;
+package gdsc.speacher.domain;
 
-
-import gdsc.speacher.domain.BaseEntity;
-import gdsc.speacher.domain.Feedback;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,15 +9,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VR extends BaseEntity {
+public class NLP extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "vr_id")
+    @Column(name = "nlp_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "feedback_id")
-    private Feedback feedback;
+    @JoinColumn(name = "video_id")
+    private Video video;
 
     private String val;
 }

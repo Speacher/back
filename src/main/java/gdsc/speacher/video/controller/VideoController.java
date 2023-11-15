@@ -2,6 +2,8 @@ package gdsc.speacher.video.controller;
 
 import com.amazonaws.HttpMethod;
 import gdsc.speacher.config.BaseResponse;
+import gdsc.speacher.cv.dto.CvDto;
+import gdsc.speacher.domain.BaseEntity;
 import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.domain.Member;
 import gdsc.speacher.domain.Video;
@@ -11,9 +13,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +45,18 @@ public class VideoController {
 
     //비디오 분석
     @CrossOrigin
-    @PostMapping("/analyze")
-    public BaseResponse<String> analyze(@RequestPart("file") MultipartFile file) throws IOException {
-        String analyze = videoService.analyze(file);
+    @PostMapping("/analyze-cv")
+    public BaseResponse<CvDto> analyzeCv(@RequestPart("file") MultipartFile file)  {
+        CvDto analyze = videoService.analyzeCv(file);
         return BaseResponse.onSuccess(analyze);
     }
+
+    @PostMapping("/analyze-nlp")
+    public BaseResponse<String> analyzeNlp(@RequestPart("file") MultipartFile file)  {
+        String analyze = videoService.analyzeNlp(file);
+        return BaseResponse.onSuccess(analyze);
+    }
+
     //비디오 리스트 조회
     @GetMapping
     public BaseResponse<List<VideoDto>> videoList() {

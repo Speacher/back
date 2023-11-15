@@ -1,4 +1,4 @@
-package gdsc.speacher.feedback.dto;
+package gdsc.speacher.nlp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CvDto {
+public class NlpDto {
     private String val;
 }
