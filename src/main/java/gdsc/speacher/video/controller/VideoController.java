@@ -2,9 +2,10 @@ package gdsc.speacher.video.controller;
 
 import com.amazonaws.HttpMethod;
 import gdsc.speacher.config.BaseResponse;
+import gdsc.speacher.cv.dto.CvDto;
+import gdsc.speacher.domain.*;
+import gdsc.speacher.nlp.dto.NlpDto;
 import gdsc.speacher.video.dto.VideoDto;
-import gdsc.speacher.domain.Member;
-import gdsc.speacher.domain.Video;
 import gdsc.speacher.login.config.SessionConst;
 import gdsc.speacher.video.service.VideoService;
 import jakarta.servlet.http.HttpSession;
@@ -13,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,11 +42,18 @@ public class VideoController {
 
     //비디오 분석
     @CrossOrigin
-    @PostMapping("/analyze")
-    public BaseResponse<String> analyze(@RequestPart("file") MultipartFile file) throws IOException {
-        String analyze = videoService.analyze(file);
+    @PostMapping("/{videoId}/analyze-cv")
+    public BaseResponse<CvDto> analyzeCv(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
+        CvDto analyze = videoService.analyzeCv(file);
         return BaseResponse.onSuccess(analyze);
     }
+
+    @PostMapping("/{videoId}/analyze-nlp")
+    public BaseResponse<NlpDto> analyzeNlp(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
+        NlpDto analyze = videoService.analyzeNlp(file, videoId);
+        return BaseResponse.onSuccess(analyze);
+    }
+
     //비디오 리스트 조회
     @GetMapping
     public BaseResponse<List<VideoDto>> videoList() {
@@ -68,4 +74,24 @@ public class VideoController {
         VideoDto videoDto = new VideoDto(findVideo);
         return BaseResponse.onSuccess(videoDto);
     }
+
+    //특정 비디오 CV 피드백 조회
+    @GetMapping("/{videoId}/cv")
+    public BaseResponse<CvDto> cvFeedback(@PathVariable Long videoId) {
+        Video findVideo = videoService.findById(videoId);
+        CV cv = findVideo.getCv();
+        CvDto cvDto = new CvDto(cv);
+        return BaseResponse.onSuccess(cvDto);
+    }
+
+    //특정 비디오 CV 피드백 조회
+    @GetMapping("/{videoId}/nlp")
+    public BaseResponse<NlpDto> nlpFeedback(@PathVariable Long videoId) {
+        Video findVideo = videoService.findById(videoId);
+        NLP nlp = findVideo.getNlp();
+        NlpDto nlpDto = new NlpDto(nlp.getScript(),nlp.getTime(),nlp.getSpeed(),nlp.getFillerWord());
+        return BaseResponse.onSuccess(nlpDto);
+    }
+
+
 }
