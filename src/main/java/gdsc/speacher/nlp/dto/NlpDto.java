@@ -1,5 +1,6 @@
 package gdsc.speacher.nlp.dto;
 
+import gdsc.speacher.domain.NLP;
 import jakarta.persistence.Column;
 import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
@@ -18,4 +19,11 @@ public class NlpDto {
     private Double speed;
 
     private String fillerWord;
+
+    public NlpDto(NLP nlp) {
+        this.script = nlp.getScript();
+        this.time = nlp.getTime();
+        this.speed = nlp.getSpeed();
+        this.fillerWord = nlp.getFillerWord();
+    }
 }

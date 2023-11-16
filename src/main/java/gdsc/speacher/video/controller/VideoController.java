@@ -5,6 +5,7 @@ import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.domain.*;
 import gdsc.speacher.nlp.dto.NlpDto;
+import gdsc.speacher.video.dto.FeedbackDto;
 import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.login.config.SessionConst;
 import gdsc.speacher.video.dto.VideoRes;
@@ -41,17 +42,17 @@ public class VideoController {
         return BaseResponse.onSuccess(videoRes);
     }
 
-    //비디오 분석
+    //비디오 cv분석
     @CrossOrigin
     @PostMapping("/{videoId}/analyze-cv")
-    public BaseResponse<CvDto> analyzeCv(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
-        CvDto analyze = videoService.analyzeCv(file);
+    public BaseResponse<CvDto> analyzeCv( @PathVariable Long videoId)  {
+        CvDto analyze = videoService.analyzeCv(videoId);
         return BaseResponse.onSuccess(analyze);
     }
-
+    //비디오 nlp분석
     @PostMapping("/{videoId}/analyze-nlp")
-    public BaseResponse<NlpDto> analyzeNlp(@RequestPart("file") MultipartFile file, @PathVariable Long videoId)  {
-        NlpDto analyze = videoService.analyzeNlp(file, videoId);
+    public BaseResponse<NlpDto> analyzeNlp(@PathVariable Long videoId)  {
+        NlpDto analyze = videoService.analyzeNlp(videoId);
         return BaseResponse.onSuccess(analyze);
     }
 
@@ -70,10 +71,9 @@ public class VideoController {
     }
     //특정 비디오 조회
     @GetMapping("/{videoId}")
-    public BaseResponse<VideoDto> video(@PathVariable Long videoId) {
-        Video findVideo = videoService.findById(videoId);
-        VideoDto videoDto = new VideoDto(findVideo);
-        return BaseResponse.onSuccess(videoDto);
+    public BaseResponse<FeedbackDto> video(@PathVariable Long videoId) {
+        FeedbackDto video = videoService.findVideo(videoId);
+        return BaseResponse.onSuccess(video);
     }
 
     //특정 비디오 CV 피드백 조회
@@ -84,7 +84,6 @@ public class VideoController {
         CvDto cvDto = new CvDto(cv);
         return BaseResponse.onSuccess(cvDto);
     }
-
     //특정 비디오 CV 피드백 조회
     @GetMapping("/{videoId}/nlp")
     public BaseResponse<NlpDto> nlpFeedback(@PathVariable Long videoId) {

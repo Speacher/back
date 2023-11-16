@@ -38,9 +38,8 @@ public class Video extends BaseEntity{
     @OneToOne(mappedBy = "video", cascade = CascadeType.ALL)
     private NLP nlp;
 
-    public Video(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
+    @OneToOne(mappedBy = "video", cascade = CascadeType.ALL)
+    private GPT gpt;
 
     public Video(Member member, String videoUrl, String title) {
         this.member = member;
