@@ -9,6 +9,7 @@ import gdsc.speacher.config.exception.handler.FileHandler;
 import gdsc.speacher.config.exception.handler.JsonHandler;
 import gdsc.speacher.config.exception.handler.VideoHandler;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
+import gdsc.speacher.converter.UrlToFileConvertor;
 import gdsc.speacher.cv.repository.CvRepository;
 import gdsc.speacher.domain.Member;
 import gdsc.speacher.domain.NLP;
@@ -33,13 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static gdsc.speacher.config.code.status.ErrorStatus.*;
 
@@ -84,19 +81,29 @@ public class VideoService {
     }
 
     @Transactional
-    public CvDto analyzeCv(MultipartFile file) {
-        RestTemplate restTemplate = new RestTemplate();
+    public CvDto analyzeCv(Long videoId)  {
+
+        Video video = videoRepository.findById(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
+        log.info("{} Video 조회", video.getId());
+        File file = null;
+        try {
+            file = UrlToFileConvertor.getFileFromURL(video.getVideoUrl());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("VideoURL을 통해 file 불러오기 성공 {}", video.getVideoUrl());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", file.getResource());
+        body.add("file", new FileSystemResource(file));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://172.20.10.2:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("분석 완료 - 분석 결과 : {}", response.getBody());
         JsonToCvDtoConverter converter = new JsonToCvDtoConverter();
         CvDto cvDto = null;
@@ -106,7 +113,8 @@ public class VideoService {
             throw new RuntimeException(e);
         }
 
-        CV cv = new CV(cvDto.getCrossing_arms_count(),
+        CV cv = new CV(video,
+                cvDto.getCrossing_arms_count(),
                 cvDto.getHands_in_pockets_count(),
                 cvDto.getWalking_actions(),
                 cvDto.getHand_to_face_actions(),
@@ -117,46 +125,35 @@ public class VideoService {
         return cvDto;
     }
 
-    public NlpDto analyzeNlp(MultipartFile file, Long videoId) {
+    public NlpDto analyzeNlp(Long videoId) {
+        Video video = videoRepository.findById(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
+        log.info("{} Video 조회", video.getId());
 
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".") + 1) : null;
-
-        if (!"mp4".equalsIgnoreCase(extension) && !"mp3".equalsIgnoreCase(extension)) {
-            throw new FileHandler(INVALID_FILE_FORMAT);
-        }
-
-        // 2. 파일을 서버에 저장
-        File sourceFile = new File("temp." + extension);
-        try(OutputStream os = new FileOutputStream(sourceFile)) {
-            os.write(file.getBytes());
-        } catch (FileNotFoundException e) {
-            throw new FileHandler(FILE_NOT_FOUND);
+        File file = null;
+        try {
+            file = UrlToFileConvertor.getFileFromURL(video.getVideoUrl());
         } catch (IOException e) {
-            throw new FileHandler(FILE_IO_EXCEPTION);
+            throw new RuntimeException(e);
         }
+        log.info("VideoURL을 통해 file 불러오기 성공 {}", video.getVideoUrl());
 
-        // 3. mp4 파일일 경우 mp3로 변환
+        // 1. mp4 파일일 경우 mp3로 변환
         String targetFileName = "temp.mp3";
-        if ("mp4".equalsIgnoreCase(extension)) {
-            convertMp4ToMp3(sourceFile.getAbsolutePath(), targetFileName);
-        } else {
-            targetFileName = sourceFile.getAbsolutePath();
-        }
+        convertMp4ToMp3(file.getAbsolutePath(), targetFileName);
         log.info("mp3로 변환 완료");
-        // 4. mp3 파일을 플라스크 서버로 전송
-        RestTemplate restTemplate = new RestTemplate();
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new FileSystemResource(new File(targetFileName)));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        // 2. mp3 파일을 플라스크 서버로 전송
+        RestTemplate restTemplate = new RestTemplate();
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://172.20.10.2:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> analyzeResult = null;
@@ -175,17 +172,12 @@ public class VideoService {
             throw new JsonHandler(JSON_TO_STRING_ERROR);
         }
         NlpDto nlpDto = new NlpDto((String)analyzeResult.get("script"), (Double) analyzeResult.get("time"), (Double) analyzeResult.get("speed"), fillerWordJson);
-        Video video = videoRepository.findById(videoId).orElseThrow(() -> new IllegalArgumentException("비디오 못찾음"));
         NLP nlp = new NLP(nlpDto.getScript(), nlpDto.getTime(), nlpDto.getSpeed(), nlpDto.getFillerWord(), video);
         nlpRepository.save(nlp);
         log.info("nlp 분석 결과 저장 성공 {}", nlp.getId());
 
         // 5. 임시 파일 삭제
-        sourceFile.delete();
-        if (!sourceFile.getAbsolutePath().equals(targetFileName)) {
-            new File(targetFileName).delete();
-        }
-
+        new File(targetFileName).delete();
         return nlpDto;
     }
 

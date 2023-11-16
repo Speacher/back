@@ -25,7 +25,8 @@ public class CV extends BaseEntity {
     private Integer hand_to_face_actions;
     private Integer hands_behind_back_actions;
 
-    public CV(Integer crossing_arms_count, Integer hands_in_pockets_count, Integer walking_actions, Integer hand_to_face_actions, Integer hands_behind_back_actions) {
+    public CV(Video video, Integer crossing_arms_count, Integer hands_in_pockets_count, Integer walking_actions, Integer hand_to_face_actions, Integer hands_behind_back_actions) {
+        this.video = video;
         this.crossing_arms_count = crossing_arms_count;
         this.hands_in_pockets_count = hands_in_pockets_count;
         this.walking_actions = walking_actions;
