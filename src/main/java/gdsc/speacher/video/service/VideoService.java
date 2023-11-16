@@ -54,7 +54,6 @@ public class VideoService {
     private final GptRepository gptRepository;
 
 
-
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
@@ -86,7 +85,11 @@ public class VideoService {
 
     @Transactional
     public CvDto analyzeCv(Long videoId)  {
-
+        File tempFile = new File("temp.mp3");
+        if (tempFile.exists()) {
+            tempFile.delete();
+            log.info("파일이 존재하여 삭제");
+        }
         Video video = videoRepository.findById(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
         log.info("{} Video 조회", video.getId());
         File file = null;
@@ -107,7 +110,7 @@ public class VideoService {
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://172.20.10.2:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://127.0.0.1:5000/api/predict", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("분석 완료 - 분석 결과 : {}", response.getBody());
         JsonToCvDtoConverter converter = new JsonToCvDtoConverter();
         CvDto cvDto = null;
@@ -157,7 +160,7 @@ public class VideoService {
         log.info("flask 서버 API 호출");
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://172.20.10.2:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
+                "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
         log.info("flask 서버 API 리턴 완료");
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> analyzeResult = null;
@@ -200,7 +203,7 @@ public class VideoService {
         body2.put("cv_json_result", cvJsonResult);
         body2.put("nlp_json_result", nlpJsonResult);
         log.info("gpt api 호출");
-        ResponseEntity<String> response2 = restTemplate.postForEntity("http://172.20.10.2:5000/api/gpt", body2, String.class);
+        ResponseEntity<String> response2 = restTemplate.postForEntity("http://localhost:5000/api/gpt", body2, String.class);
         log.info("gpt api 호출 완료");
         GPT gpt = new GPT(response2.getBody(), video);
         gptRepository.save(gpt);
