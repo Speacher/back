@@ -5,6 +5,7 @@ import gdsc.speacher.config.BaseResponse;
 import gdsc.speacher.cv.dto.CvDto;
 import gdsc.speacher.domain.*;
 import gdsc.speacher.nlp.dto.NlpDto;
+import gdsc.speacher.video.dto.FeedbackDto;
 import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.login.config.SessionConst;
 import gdsc.speacher.video.dto.VideoRes;
@@ -70,11 +71,11 @@ public class VideoController {
     }
     //특정 비디오 조회
     @GetMapping("/{videoId}")
-    public BaseResponse<VideoDto> video(@PathVariable Long videoId) {
-        Video findVideo = videoService.findById(videoId);
-        VideoDto videoDto = new VideoDto(findVideo);
-        return BaseResponse.onSuccess(videoDto);
+    public BaseResponse<FeedbackDto> video(@PathVariable Long videoId) {
+        FeedbackDto video = videoService.findVideo(videoId);
+        return BaseResponse.onSuccess(video);
     }
+
     //특정 비디오 CV 피드백 조회
     @GetMapping("/{videoId}/cv")
     public BaseResponse<CvDto> cvFeedback(@PathVariable Long videoId) {

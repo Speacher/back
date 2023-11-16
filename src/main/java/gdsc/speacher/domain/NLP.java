@@ -29,7 +29,7 @@ public class NLP extends BaseEntity {
     @Column(nullable = false)
     private String fillerWord;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id")
     private Video video;
 

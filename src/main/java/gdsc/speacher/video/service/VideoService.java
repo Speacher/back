@@ -11,14 +11,15 @@ import gdsc.speacher.config.exception.handler.VideoHandler;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.converter.UrlToFileConvertor;
 import gdsc.speacher.cv.repository.CvRepository;
-import gdsc.speacher.domain.Member;
-import gdsc.speacher.domain.NLP;
-import gdsc.speacher.domain.Video;
-import gdsc.speacher.domain.CV;
+import gdsc.speacher.domain.*;
 import gdsc.speacher.cv.dto.CvDto;
+import gdsc.speacher.gpt.dto.GptDto;
+import gdsc.speacher.gpt.repository.GptRepository;
 import gdsc.speacher.member.repository.MemberRepository;
 import gdsc.speacher.nlp.dto.NlpDto;
 import gdsc.speacher.nlp.repository.NLPRepository;
+import gdsc.speacher.video.dto.FeedbackDto;
+import gdsc.speacher.video.dto.VideoDto;
 import gdsc.speacher.video.dto.VideoRes;
 import gdsc.speacher.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class VideoService {
     private final MemberRepository memberRepository;
     private final CvRepository cvRepository;
     private final NLPRepository nlpRepository;
+    private final GptRepository gptRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -154,7 +156,7 @@ public class VideoService {
         // Flask 서버 API 호출
         ResponseEntity<String> response = restTemplate.exchange(
                 "http://127.0.0.1:5000/api/predict2", org.springframework.http.HttpMethod.POST, requestEntity, String.class);
-
+        log.info("flask 서버 API 리턴 완료");
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> analyzeResult = null;
         try {
@@ -173,9 +175,33 @@ public class VideoService {
         }
         NlpDto nlpDto = new NlpDto((String)analyzeResult.get("script"), (Double) analyzeResult.get("time"), (Double) analyzeResult.get("speed"), fillerWordJson);
         NLP nlp = new NLP(nlpDto.getScript(), nlpDto.getTime(), nlpDto.getSpeed(), nlpDto.getFillerWord(), video);
+
         nlpRepository.save(nlp);
         log.info("nlp 분석 결과 저장 성공 {}", nlp.getId());
+        CV cv = cvRepository.findByVideoId(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
+        CvDto cvDto = new CvDto(cv);
+        String cvJsonResult = null;
+        try {
+            cvJsonResult = objectMapper.writeValueAsString(cvDto);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
+        String nlpJsonResult = null;
+        try {
+            nlpJsonResult = objectMapper.writeValueAsString(nlpDto);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<String, String> body2 = new HashMap<>();
+        body2.put("cv_json_result", cvJsonResult);
+        body2.put("nlp_json_result", nlpJsonResult);
+        log.info("gpt api 호출");
+        ResponseEntity<String> response2 = restTemplate.postForEntity("http://localhost:5000/api/gpt", body2, String.class);
+        log.info("gpt api 호출 완료");
+        GPT gpt = new GPT(response2.getBody(), video);
+        gptRepository.save(gpt);
         // 5. 임시 파일 삭제
         new File(targetFileName).delete();
         return nlpDto;
@@ -195,8 +221,6 @@ public class VideoService {
     }
 
 
-
-
     public List<Video> findAll(Long memberId) {
         log.info("모든 영상 최신순으로 모두 조회");
         return videoRepository.findAllByMemberIdOrderByCreateDateDesc(memberId);
@@ -207,6 +231,25 @@ public class VideoService {
                 .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
         log.info("{} 비디오 영상 조회", findVideo.getTitle());
         return findVideo;
+    }
+
+    public FeedbackDto findVideo(Long videoId) {
+        Video findVideo = videoRepository.findById(videoId)
+                .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
+        log.info("{} 비디오 영상 조회", findVideo.getTitle());
+        VideoDto videoDto = new VideoDto(findVideo);
+        CV cv = cvRepository.findByVideoId(videoId)
+                .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
+        CvDto cvDto = new CvDto(cv);
+
+        NLP nlp = nlpRepository.findByVideoId(videoId)
+                .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
+        NlpDto nlpDto = new NlpDto(nlp);
+
+        GPT gpt = gptRepository.findByVideoId(videoId)
+                .orElseThrow(() -> new VideoHandler(VIDEO_INQUIRY_ERROR));
+        GptDto gptDto = new GptDto(gpt);
+        return new FeedbackDto(videoDto, cvDto, nlpDto, gptDto);
     }
 
 
