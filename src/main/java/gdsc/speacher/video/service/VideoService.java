@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gdsc.speacher.config.exception.handler.FileHandler;
 import gdsc.speacher.config.exception.handler.JsonHandler;
 import gdsc.speacher.config.exception.handler.VideoHandler;
+import gdsc.speacher.converter.CVConverter;
 import gdsc.speacher.converter.JsonToCvDtoConverter;
 import gdsc.speacher.converter.UrlToFileConvertor;
 import gdsc.speacher.cv.repository.CvRepository;
@@ -52,7 +53,7 @@ public class VideoService {
     private final CvRepository cvRepository;
     private final NLPRepository nlpRepository;
     private final GptRepository gptRepository;
-
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -96,7 +97,7 @@ public class VideoService {
         try {
             file = UrlToFileConvertor.getFileFromURL(video.getVideoUrl());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileHandler(URL_TO_MP4_ERROR);
         }
         log.info("VideoURL을 통해 file 불러오기 성공 {}", video.getVideoUrl());
         HttpHeaders headers = new HttpHeaders();
@@ -117,18 +118,37 @@ public class VideoService {
         try {
             cvDto = converter.convert(response.getBody());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new JsonHandler(JSON_TO_CVDto_ERROR);
         }
-
-        CV cv = new CV(video,
-                cvDto.getCrossing_arms_count(),
-                cvDto.getHands_in_pockets_count(),
-                cvDto.getWalking_actions(),
-                cvDto.getHand_to_face_actions(),
-                cvDto.getHands_behind_back_actions());
-
+        CV cv = CVConverter.cvDtoToCV(video, cvDto);
         cvRepository.save(cv);
         log.info("Cv 분석 결과 저장 성공 {}", cv.getId());
+
+        CV cv2 = cvRepository.findByVideoId(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
+        CvDto cvDto2 = new CvDto(cv2);
+        String cvJsonResult = null;
+        try {
+            cvJsonResult = objectMapper.writeValueAsString(cvDto2);
+        } catch (JsonProcessingException e) {
+            throw new JsonHandler(JSON_TO_STRING_ERROR);
+        }
+        NLP nlp = nlpRepository.findByVideoId(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
+        NlpDto nlpDto = new NlpDto(nlp);
+        String nlpJsonResult = null;
+        try {
+            nlpJsonResult = objectMapper.writeValueAsString(nlpDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonHandler(JSON_TO_STRING_ERROR);
+        }
+
+        Map<String, String> body2 = new HashMap<>();
+        body2.put("cv_json_result", cvJsonResult);
+        body2.put("nlp_json_result", nlpJsonResult);
+        log.info("gpt api 호출");
+        ResponseEntity<String> response2 = restTemplate.postForEntity("http://localhost:5000/api/gpt", body2, String.class);
+        log.info("gpt api 호출 완료");
+        GPT gpt = new GPT(response2.getBody(), video);
+        gptRepository.save(gpt);
         return cvDto;
     }
 
@@ -140,7 +160,7 @@ public class VideoService {
         try {
             file = UrlToFileConvertor.getFileFromURL(video.getVideoUrl());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileHandler(URL_TO_MP4_ERROR);
         }
         log.info("VideoURL을 통해 file 불러오기 성공 {}", video.getVideoUrl());
 
@@ -183,30 +203,7 @@ public class VideoService {
 
         nlpRepository.save(nlp);
         log.info("nlp 분석 결과 저장 성공 {}", nlp.getId());
-        CV cv = cvRepository.findByVideoId(videoId).orElseThrow(() -> new VideoHandler(INVALID_VIDEO_ID));
-        CvDto cvDto = new CvDto(cv);
-        String cvJsonResult = null;
-        try {
-            cvJsonResult = objectMapper.writeValueAsString(cvDto);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
-        String nlpJsonResult = null;
-        try {
-            nlpJsonResult = objectMapper.writeValueAsString(nlpDto);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        Map<String, String> body2 = new HashMap<>();
-        body2.put("cv_json_result", cvJsonResult);
-        body2.put("nlp_json_result", nlpJsonResult);
-        log.info("gpt api 호출");
-        ResponseEntity<String> response2 = restTemplate.postForEntity("http://localhost:5000/api/gpt", body2, String.class);
-        log.info("gpt api 호출 완료");
-        GPT gpt = new GPT(response2.getBody(), video);
-        gptRepository.save(gpt);
         // 5. 임시 파일 삭제
         new File(targetFileName).delete();
         return nlpDto;
